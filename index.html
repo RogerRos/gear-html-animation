@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <style>
+        body {
+            margin: 0;
+            overflow: hidden;
+        }
+        .engranaje {
+            position: absolute;
+            transform-origin: center;
+        }
+    </style>
+</head>
+<body>
+    <script>
+        const engranajes = []; // Almacena información de los engranajes
+        const centro = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
+
+        // Crear un engranaje en la página (principal)
+        function crearEngranaje(x, y, tamaño, velocidad, rotacionInicial = 0) {
+            const engranaje = document.createElement('div');
+            engranaje.classList.add('engranaje');
+            engranaje.style.width = `${tamaño}px`;
+            engranaje.style.height = `${tamaño}px`;
+            engranaje.style.left = `${x - tamaño / 2}px`;
+            engranaje.style.top = `${y - tamaño / 2}px`;
+            engranaje.style.backgroundImage = "url('engranaje.png')"; // Cambiar la URL aquí
+            engranaje.style.backgroundSize = 'contain';
+            engranaje.style.backgroundRepeat = 'no-repeat';
+            engranaje.style.backgroundPosition = 'center';
+            document.body.appendChild(engranaje);
+
+            engranajes.push({ elemento: engranaje, velocidadBase: velocidad, rotación: rotacionInicial });
+        }
+
+        // Animar todos los engranajes
+        function animarEngranajes() {
+            const distanciaAlCentro = calcularDistanciaAlCentro();
+            const factorVelocidad = calcularFactorVelocidad(distanciaAlCentro);
+
+            engranajes.forEach((engr) => {
+                // Ajustar velocidad dinámica según el signo de la velocidad base
+                const velocidadDinamica = engr.velocidadBase > 0 
+                    ? engr.velocidadBase + factorVelocidad 
+                    : engr.velocidadBase - factorVelocidad;
+
+                engr.rotación += velocidadDinamica;
+                engr.elemento.style.transform = `rotate(${engr.rotación}deg)`;
+            });
+            requestAnimationFrame(animarEngranajes);
+        }
+
+        // Función para calcular la distancia del ratón al centro de la pantalla
+        function calcularDistanciaAlCentro() {
+            const dx = Math.abs(mousePos.x - centro.x);
+            const dy = Math.abs(mousePos.y - centro.y);
+            return Math.sqrt(dx * dx + dy * dy);
+        }
+
+        // Función para calcular un factor de velocidad gradual
+        function calcularFactorVelocidad(distancia) {
+            const maxDistancia = Math.sqrt(centro.x ** 2 + centro.y ** 2);
+            const proximidad = 1 - Math.min(distancia / maxDistancia, 1);
+            return proximidad * 1;
+        }
+
+        // Seguimiento del cursor
+        const mousePos = { x: centro.x, y: centro.y };
+        document.addEventListener('mousemove', (event) => {
+            mousePos.x = event.clientX;
+            mousePos.y = event.clientY;
+        });
+
+        // Crear engranajes con rotaciones iniciales diferentes
+        crearEngranaje(730, 360, 100, 0.1, 51);   // Engranaje 1
+        crearEngranaje(850, 355, 150, -0.1, 0);   // Engranaje 2
+        crearEngranaje(750, 440, 80, -0.1, -3);   // Engranaje 3
+
+        // Iniciar animación
+        animarEngranajes();
+    </script>
+</body>
+</html>
